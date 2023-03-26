@@ -16,11 +16,11 @@ producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
 # Get data from API endpoint
 response = requests.get(url)
 data = response.json()
-
 price = data['data']['primaryData']['lastSalePrice']
 
 # Log the data
 log_msg = f"Symbol: {symbol}, Price: {price}"
 logging.info(log_msg)
 
+# Send price data into topic 'nasdaq-prices' and make it JSON encoded ddat type
 producer.send('nasdaq-prices', json.dumps({'symbol': symbol, 'price': price}).encode())
