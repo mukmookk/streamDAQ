@@ -6,6 +6,7 @@ import logging
 
 # Configurations and initialization
 logging.basicConfig(filename='../logs/crawl.log', format='%(asctime)s %(levelname)s %(message)s')
+logging,getLogger().setLevel(logging.INFO)
 
 symbol = "AAPL"
 price = 0
