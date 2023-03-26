@@ -4,7 +4,7 @@ import requests
 import json
 
 # Set up logging to write to file
-logging.basicConfig(filename='../logs/crawl_aapl_price.log', format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(filename='../logs/aapl_price.log', format='%(asctime)s %(levelname)s %(message)s')
 
 # Set up ticker and URL
 symbol = "AAPL"
