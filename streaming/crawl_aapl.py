@@ -11,5 +11,5 @@ response = requests.get(url)
 data = response.json()
 
 price = data['data']['primaryData']['lastSalePrice']
-
+print(data)
 producer.send('nasdaq-prices', json.dumps({'symbol': symbol, 'price': price}).encode())
