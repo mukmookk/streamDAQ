@@ -29,8 +29,8 @@ try:
 except Exception as e:
     error_msg = f"Error sending message: {e}"
     print(error_msg)
-    logging.WARN(error_msg)
+    logging.warn(error_msg)
 finally:
     # Close the producer to flush any remaining messages
     producer.close()
-    logging.INFO("close kafka producer process")
+    logging.info("close kafka producer process")
