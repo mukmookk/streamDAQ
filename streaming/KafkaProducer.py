@@ -4,8 +4,11 @@ from json import dumps
 import json
 import logging
 
-# Configurations
+# Configurations and initialization
 logging.basicConfig(filename='../logs/crawl.log', format='%(asctime)s %(levelname)s %(message)s')
+
+symbol = "AAPL"
+price = 0
 
 # Connect to Kafka Producer
 producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
@@ -20,8 +23,14 @@ try:
     print(f"Message sent successfully to {record_metadata.topic} "
           f"partition {record_metadata.partition} "
           f"offset {record_metadata.offset}")
+    # Log the data
+    log_msg = f"Symbol: {symbol}, Price: {price}"
+    logging.info(log_msg)
 except Exception as e:
-    print(f"Error sending message: {e}")
+    error_msg = f"Error sending message: {e}"
+    print(error_msg)
+    logging.WARN(error_msg)
 finally:
     # Close the producer to flush any remaining messages
     producer.close()
+    logging.INFO("close kafka producer process")
