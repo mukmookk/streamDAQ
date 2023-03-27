@@ -61,7 +61,7 @@ if __name__ == '__main__':
         reportLog("Environment variable 'APIKEY' not found", "error")
         raise ValueError("Environment variable 'APIKEY' not found")
     else:
-        reportLog("API Key Successfully connected", info)
+        reportLog("API Key Successfully connected", 'info')
 
     # Connect to Kafka Producer
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
