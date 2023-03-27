@@ -1,4 +1,5 @@
-mport pandas as pd
+import pandas as pd
+import json
 from kafka import KafkaConsumer
 
 consumer = KafkaConsumer(
