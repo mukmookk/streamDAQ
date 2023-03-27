@@ -6,6 +6,7 @@ import requests
 import logging
 import os
 
+
 # Configurations and initialization
 logging.basicConfig(filename='../logs/crawl.log', format='%(asctime)s %(levelname)s %(message)s')
 logging.getLogger().setLevel(logging.INFO) 
@@ -67,7 +68,10 @@ if __name__ == '__main__':
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                          value_serializer=lambda x: dumps(x).encode('utf-8'))
     # Send message toward topic
-    future = producer.send('nasdaq_prices', value=getDataFromRest())
+    future = producer.send('nasdaq_prices', 
+                           value=getDataFromRest(base_url=base_url, 
+                                                 api_key=api_key, 
+                                                 symbol='AAPL'))
 
     # Block until the message is sent and get the metadata
     try:
