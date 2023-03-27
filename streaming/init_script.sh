@@ -14,7 +14,11 @@ while getopts "hk:" opt; do
             ;;
         k)
             export APIKEY="${OPTARG}"
-            echo "export APIKEY=${OPTARG}" >> ~/.bashrc
+            if grep -q '^export APIKEY=' ~/.bashrc; then
+                sed -i "s/^export APIKEY=.*/export APIKEY=${OPTARG}/" ~/.bashrc
+            else
+                echo "export APIKEY=${OPTARG}" >> ~/.bashrc
+            fi
             ;;
         \?)
             usage
