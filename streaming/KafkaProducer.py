@@ -16,7 +16,7 @@ producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                          value_serializer=lambda x: dumps(x).encode('utf-8'))
 
 # Send message toward topic
-future = producer.send('nasdaq_prices', value={"hello" : "world"})
+future = producer.send('nasdaq_prices', value={"name" : "youngmuk"})
 
 # Block until the message is sent and get the metadata
 try:
