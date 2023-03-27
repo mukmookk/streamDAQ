@@ -19,6 +19,7 @@ while getopts "hk:" opt; do
             else
                 echo "export APIKEY=${OPTARG}" >> ~/.bashrc
             fi
+            source ~/.bashrc
             ;;
         \?)
             usage
