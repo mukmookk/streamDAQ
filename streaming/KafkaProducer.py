@@ -11,19 +11,22 @@ logging.basicConfig(filename='../logs/crawl.log', format='%(asctime)s %(levelnam
 logging.getLogger().setLevel(logging.INFO) 
 
 def reportLog(msg, level):
-    print(msg)
-    if level == 'debug':
-        logging.debug(msg)
-    elif level == 'info':
-        logging.info(msg)
-    elif level == 'warn':
-        logging.warn(msg)
-    elif level == 'error':
-        logging.error(msg)
-    elif level == 'critical':
-        logging.critical(msg)
+    log_levels = {
+        'debug': logging.debug,
+        'info': logging.info,
+        'warn': logging.warning, # Note: Use 'warning' instead of 'warn'
+        'error': logging.error,
+        'critical': logging.critical,
+    }
+
+    log_func = log_levels.get(level.lower())
+
+    if log_func is not None:
+        log_func(msg)
+        print(msg)
     else:
         logging.fatal('Provided log level is not valid')
+        print('Provided log level is not valid')
      
 
 def getDataFromRest(base_url, api_key, symbol):
