@@ -1,29 +1,25 @@
 #!/bin/bash
 
-# Define the names of the containers
-KAFKA_CONTAINER_NAME="my-kafka"
-CASSANDRA_CONTAINER_NAME="my-cassandra"
+export WORKDIR=$(pwd)
 
-# Define the network name
-NETWORK_NAME="my-network"
+# Stop and remove existing Kafka containers
+docker-compose -f $WORKDIR/kafka.yml down
 
-# Create a Docker network
-docker network create $NETWORK_NAME
+# Start Kafka containers in detached mode
+docker-compose -f $WORKDIR/kafka.yml up -d
 
-# Start the Kafka container
-docker run -d --name $KAFKA_CONTAINER_NAME --network $NETWORK_NAME -p 9092:9092 -e KAFKA_ADVERTISED_HOST_NAME=$KAFKA_CONTAINER_NAME wurstmeister/kafka:2.12-2.3.0
+# Wait for Kafka to be ready
+echo "Waiting for Kafka to be ready..."
+docker-compose exec kafka kafka-topics.sh --list >/dev/null 2>&1
+while [ $? -ne 0 ]
+do
+  sleep 1
+  docker-compose exec kafka kafka-topics.sh --list >/dev/null 2>&1
+done
+echo "Kafka is ready!"
 
-# Wait for Kafka to start up
-sleep 10
+# Create a new Kafka topic
+docker-compose exec kafka kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic nasdaq
 
-# Start the Cassandra container
-docker run -d --name $CASSANDRA_CONTAINER_NAME --network $NETWORK_NAME -p 9042:9042 cassandra:3.11
-
-# Wait for Cassandra to start up
-sleep 10
-
-# Create the Kafka topics
-docker exec -it $KAFKA_CONTAINER_NAME /opt/kafka/bin/kafka-topics.sh --create --zookeeper $KAFKA_CONTAINER_NAME:2181 --replication-factor 1 --partitions 1 --topic my-topic
-
-# Display the status of the containers
-docker ps
+# Start a Kafka consumer to listen for messages on the new topic
+docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic nasdaq --from-beginning
