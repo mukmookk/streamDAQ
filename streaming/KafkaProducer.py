@@ -58,8 +58,20 @@ def getDataFromRest(function="TIME_SERIES_DAILY_ADJUSTED", symbol="AAPL"):
 
 def getLatestPrice(response_json):
     # Get latest price
-    latest_price = response_json['Time Series (Daily)'][list(response_json['Time Series (Daily)'])[0]]['4. close']
-    return latest_price
+    latest_price_idx = list(response_json['Time Series (Daily)'])[0]
+    latest_price = response_json['Time Series (Daily)'][latest_price_idx]['4. close']
+    latest_price_timestamp = response_json['Time Series (Daily)'][latest_price_idx]['date']
+
+    # Create dictionary with index, timestamp, and latest price
+    data = {
+        "latest_price_idx": latest_price_idx,
+        "symbol": symbol,
+        "timestamp": latest_price_timestamp,
+        "latest_price": latest_price,
+    }
+
+    # Serialize dictionary to JSON and return
+    return json.dumps(data)
 
 def main():
     if api_key is None:
@@ -77,9 +89,12 @@ def main():
                         
     # Send message toward topic
     future = producer.send('nasdaq_prices', 
-                           value=getDataFromRest(base_url=base_url, 
-                                                 api_key=api_key, 
-                                                 symbol='AAPL'))
+                           value=response_json)
+
+    future = producer.send('lastest_price', 
+                           value=getLatestPrice(response_json))
+    
+    # time to wait for api limit (5 calls per minute)
     start_time = time.time()
     time_waited = 0
     
@@ -90,7 +105,7 @@ def main():
             f"partition {record_metadata.partition} "
             f"offset {record_metadata.offset}", 'info')
         # Log the data
-        reportLog(f"Symbol: {symbol}, Price: {price}", 'info')
+        reportLog(f"Symbol: {symbol} successfully reported", 'info')
     except Exception as e:
         error_msg = f"Error sending message: {e}"
         reportLog(error_msg, 'error')
