@@ -98,7 +98,7 @@ def main():
                            value=response_json)
 
     future = producer.send('lastest_price', 
-                           value=getLatestPrice(response_json))
+                           value=getLatestPrice(response_json, symbol))
     
     # time to wait for api limit (5 calls per minute)
     start_time = time.time()
