@@ -3,13 +3,18 @@ import json
 from kafka import KafkaConsumer
 
 consumer = KafkaConsumer(
-'nasdaq_prices',
-bootstrap_servers=['127.0.0.1:9092'],
-value_deserializer=lambda x : json.loads(x.decode('utf-8')))
+    'nasdaq_prices',
+    bootstrap_servers=['127.0.0.1:9092'],
+    auto_offset_reset='latest',
+    value_deserializer=lambda x : json.loads(x.decode('utf-8'))
+)
 
 print("Messages start streaming...")
 
-for message in consumer:
-    print(f"Received message: {message.value}")
+try:
+    for message in consumer:
+        print(f"Received message: {message.value}")
+except:
+    print("Message streaming finished.")
 
 print("Message streaming finished.")
