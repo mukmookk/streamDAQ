@@ -88,7 +88,7 @@ def main():
         reportLog("API Key Successfully connected", 'info')
 
     response_json = getDataFromRest()
-    latest_price = getLatestPrice(response_json)
+    latest_price = getLatestPrice(response_json, "AAPL")
     # Connect to Kafka Producer
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                          value_serializer=lambda x: dumps(x).encode('utf-8'))
@@ -98,7 +98,7 @@ def main():
                            value=response_json)
 
     future = producer.send('lastest_price', 
-                           value=getLatestPrice(response_json, symbol))
+                           value=latest_price)
     
     # time to wait for api limit (5 calls per minute)
     start_time = time.time()
