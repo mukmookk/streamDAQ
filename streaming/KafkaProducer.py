@@ -76,6 +76,7 @@ def getLatestPrice(response_json, symbol):
         "8. split coefficient": latest_price_timestamp["8. split coefficient"]
     }
 
+    print(data)
     # Serialize dictionary to JSON and return
     return json.dumps(data)
 
