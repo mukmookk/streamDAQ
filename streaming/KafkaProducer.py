@@ -64,13 +64,13 @@ def getLatestPrice(response_json):
 
     # Create dictionary with index, timestamp, and latest price
     data = {
-        "latest_price_idx": latest_price_idx,
+        "date": latest_price_idx,
         "symbol": symbol,
         "timestamp": latest_price_timestamp,
         "latest_price": latest_price,
     }
 
-    print(latest_price_timestamp)
+    print(data)
     # Serialize dictionary to JSON and return
     return json.dumps(data)
 
@@ -83,7 +83,6 @@ def main():
 
     response_json = getDataFromRest()
     latest_price = getLatestPrice(response_json)
-    print(latest_price)
     # Connect to Kafka Producer
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                          value_serializer=lambda x: dumps(x).encode('utf-8'))
