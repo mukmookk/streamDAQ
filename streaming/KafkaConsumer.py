@@ -8,9 +8,13 @@ consumer = KafkaConsumer(
     auto_offset_reset='earliest',
     value_deserializer=lambda x : json.loads(x.decode('utf-8'))
 )
+
+# Poll the consumer to get assigned partitions
 consumer.poll()
-# go to end of the stream
-consumer.seek_to_end()
+
+# Seek to the end of each assigned partition
+for partition in consumer.assignment():
+    consumer.seek_to_end(partition)
 
 print("Messages start streaming...")
 
