@@ -56,7 +56,7 @@ def getDataFromRest(function="TIME_SERIES_DAILY_ADJUSTED", symbol="AAPL"):
         raise Exception("Unexpected response from Alpha Vantage: ", response_json)
     return response_json
 
-def getLatestPrice(response_json):
+def getLatestPrice(response_json, symbol):
     # Get latest price
     latest_price_idx = list(response_json['Time Series (Daily)'])[0]
     latest_price = response_json['Time Series (Daily)'][latest_price_idx]['4. close']
@@ -66,11 +66,16 @@ def getLatestPrice(response_json):
     data = {
         "date": latest_price_idx,
         "symbol": symbol,
-        "timestamp": latest_price_timestamp,
-        "latest_price": latest_price,
+        "1. open": latest_price_timestamp["1. open"],
+        "2. high": latest_price_timestamp["2. high"],
+        "3. low": latest_price_timestamp["3. low"],
+        "4. close": latest_price,
+        "5. adjusted close": latest_price_timestamp["5. adjusted close"],
+        "6. volume": latest_price_timestamp["6. volume"],
+        "7. dividend amount": latest_price_timestamp["7. dividend amount"],
+        "8. split coefficient": latest_price_timestamp["8. split coefficient"]
     }
 
-    print(data)
     # Serialize dictionary to JSON and return
     return json.dumps(data)
 
