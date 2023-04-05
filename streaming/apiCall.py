@@ -2,52 +2,46 @@ from alpha_vantage.timeseries import TimeSeries
 import time
 import requests
 import json
+import csv
 from pandas import json_normalize
 import pandas as pd
+# from kafka import KafkaProducer
 
-def earnings(key, list_of_tickers, output_path):
+bootstrap_servers = ['localhost:9092']
+producer = KafkaProducer(bootstrap_servers=bootstrap_servers, value_serializer=lambda v: json.dumps(v).decode('utf-8'))
+
+def earnings(key, ticker):
     """
     key = API key from Alpha Vantage
-    list_of_tickers = list of tickers to be used
-    output_path = path to output folder
+    ticker = ticker to be used
     
     return dataframe of earnings data
     """
-    # counter
-    i = 0
-    # create empty dataframe
-    df2 = pd.DataFrame()
 
-    for ticker in list_of_tickers:
-        print(ticker)
-        i = i + 1
-        url = 'https://www.alphavantage.co/query?function=EARNINGS&symbol={}&interval=1min&apikey={}'.format(ticker, key)
+    url = 'https://www.alphavantage.co/query?function=EARNINGS&symbol={}&interval=1min&apikey={}'.format(ticker, key)
+    
+    # use requests to get the data
+    with requests.Session() as s:
+        download = s.get(url)
+        decoded_content = download.content.decode('utf-8')
+        cr = csv.reader(decoded_content.splitlines(), delimiter=',')
+        earnings = list(cr)
         
-        # # requestion our URL string is passed here and converting the response to a dictionary
-        response = requests.get(url)
-        response_dict = response.json()
         start_time = time.time()
 
-        try:
+        if earnings:
             # select the data from the dictionary
-            selected_json = response_dict['quarterlyEarnings']
-            print(selected_json)
-        except:
+            print("Successfully retrieved data for {}".format(ticker))
+            print(earnings)
+        else:
             print("No data for this ticker")
-            continue
-        
+            return "No data for this ticker"
+
         time_waited = 0
         while time.time() - start_time < 12:
             time_waited += 1
             time.sleep(1)
-        print("Waiting for {} seconds".format(time_waited))
         
-        try:
-            # convert the dictionary to a dataframe
-            df = pd.DataFrame.from_dict(json_normalize(selected_json), orient='columns')
-            df.to_csv(output_path + 'file_quarterly_earnings_{}.csv'.format(ticker))
-        except:
-            print("Can not convert json to csv")
-            continue
-    return "Successfully queried {} tickers".format(i)
+
+        return earnings
 

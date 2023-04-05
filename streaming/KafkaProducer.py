@@ -1,4 +1,5 @@
-from kafka import KafkaConsumer, KafkaProducer
+import time
+from kafka import KafkaProducer
 from time import sleep
 from json import dumps
 import json
@@ -6,10 +7,13 @@ import requests
 import logging
 import os
 
-
 # Configurations and initialization
-logging.basicConfig(filename='../logs/crawl.log', format='%(asctime)s %(levelname)s %(message)s')
-logging.getLogger().setLevel(logging.INFO) 
+logging.basicConfig(filename='./logs/crawl.log', format='%(asctime)s %(levelname)s %(message)s')
+logging.getLogger().setLevel(logging.INFO)
+
+base_url = "https://www.alphavantage.co/query"
+symbol = "AAPL"
+api_key = os.environ.get('APIKEY')
 
 def reportLog(msg, level):
     log_levels = {
@@ -30,8 +34,7 @@ def reportLog(msg, level):
         print('Provided log level is not valid')
      
 
-def getDataFromRest(base_url, api_key, symbol):
-    function = "TIME_SERIES_DAILY"
+def getDataFromRest(function="TIME_SERIES_DAILY_ADJUSTED", symbol="AAPL"):
     # API paramters
     params = {
         "function": function,
@@ -53,34 +56,41 @@ def getDataFromRest(base_url, api_key, symbol):
         raise Exception("Unexpected response from Alpha Vantage: ", response_json)
     return response_json
 
-if __name__ == '__main__':
-    base_url = "https://www.alphavantage.co/query"
-    symbol = "AAPL"
-    api_key = os.environ.get('APIKEY')
+def getLatestPrice(response_json):
+    # Get latest price
+    latest_price = response_json['Time Series (Daily)'][list(response_json['Time Series (Daily)'])[0]]['4. close']
+    return latest_price
 
+def main():
     if api_key is None:
         reportLog("Environment variable 'APIKEY' not found", "error")
         raise ValueError("Environment variable 'APIKEY' not found")
     else:
         reportLog("API Key Successfully connected", 'info')
 
+    response_json = getDataFromRest()
+    latest_price = getLatestPrice(response_json)
+    print(latest_price)
     # Connect to Kafka Producer
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                          value_serializer=lambda x: dumps(x).encode('utf-8'))
+                        
     # Send message toward topic
     future = producer.send('nasdaq_prices', 
                            value=getDataFromRest(base_url=base_url, 
                                                  api_key=api_key, 
                                                  symbol='AAPL'))
-
-    # Block until the message is sent and get the metadata
+    start_time = time.time()
+    time_waited = 0
+    
+    # # Block until the message is sent and get the metadata
     try:
         record_metadata = future.get(timeout=10)
         reportLog(f"Message sent successfully to {record_metadata.topic} "
             f"partition {record_metadata.partition} "
             f"offset {record_metadata.offset}", 'info')
         # Log the data
-        reportLog(f"Symbol: {symbol}, Price: {0}")
+        reportLog(f"Symbol: {symbol}, Price: {price}", 'info')
     except Exception as e:
         error_msg = f"Error sending message: {e}"
         reportLog(error_msg, 'error')
@@ -88,3 +98,12 @@ if __name__ == '__main__':
         # Close the producer to flush any remaining messages
         producer.close()
         reportLog("close kafka producer process", 'info')
+    
+    while time.time() - start_time < 12:
+        time_waited += 1
+        time.sleep(1)
+    reportLog("Waited for {} seconds".format(time_waited), 'info')
+
+if __name__ == '__main__':
+    while (1):
+        main()

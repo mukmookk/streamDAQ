@@ -15,4 +15,5 @@ dataframe1 = pd.read_excel('streaming/sample/SteelIndustry.xlsx')
 print(dataframe1)
 list_of_tickers = dataframe1['Ticker'].to_numpy()
 
-print(earnings(apikey, list_of_tickers, pathway))
+for ticker in list_of_tickers:
+    earnings(apikey, ticker)
