@@ -1,13 +1,14 @@
 #!/bin/bash
 
 function usage() {
-    echo "Usage: $0 [-h] [-k <API_KEY>]"
+    echo "Usage: $0 [-h] [-k <API_KEY>] [-d <DIRECTORY>]"
     echo "  -h: Display this help message"
     echo "  -k <API_KEY>: Set the API key"
+    echo "  -d <DIRECTORY>: Set the DAQWD environment variable to the specified directory"
     exit 1
 }
 
-while getopts "hk:" opt; do
+while getopts "hk:d:" opt; do
     case ${opt} in
         h)
             usage
@@ -21,6 +22,9 @@ while getopts "hk:" opt; do
             fi
             source ~/.bashrc
             ;;
+        d)
+            export DAQWD="${OPTARG}"
+            ;;
         \?)
             usage
             ;;
@@ -32,4 +36,16 @@ if [[ -z "${APIKEY}" ]]; then
     usage
 fi
 
+if [[ -z "${DAQWD}" ]]; then
+    echo "DAQWD is not set"
+    usage
+fi
+
 echo "APIKEY is set to ${APIKEY}"
+echo "DAQWD is set to ${DAQWD}"
+
+# change directory to DAQWD
+cd $DAQWD
+
+# execute Python file
+python your_python_file.py
