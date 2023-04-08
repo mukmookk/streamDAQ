@@ -3,10 +3,12 @@ import time
 import requests
 import json
 import csv
-# from kafka import KafkaProducer
+from utils import reportLog
+from kafka import KafkaProducer
 
 bootstrap_servers = ['localhost:9092']
-producer = KafkaProducer(bootstrap_servers=bootstrap_servers, value_serializer=lambda v: json.dumps(v).decode('utf-8'))
+producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
+                         value_serializer=lambda v: json.dumps(v).decode('utf-8'))
 
 def earnings(key, ticker):
     """
@@ -29,17 +31,15 @@ def earnings(key, ticker):
 
         if earnings:
             # select the data from the dictionary
-            print("Successfully retrieved data for {}".format(ticker))
-            print(earnings)
+            reportLog("Successfully retrieved data for {}".format(ticker), "info")
         else:
-            print("No data for this ticker")
+            reportLog("No data for this ticker", "WARN")
             return "No data for this ticker"
 
         time_waited = 0
         while time.time() - start_time < 12:
             time_waited += 1
             time.sleep(1)
-        
-
+            
         return earnings
 

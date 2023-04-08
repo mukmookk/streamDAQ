@@ -2,6 +2,10 @@ import logging
 import config
 
 def reportLog(msg, level):
+    """
+    msg = message to be logged
+    level = level of logging
+    """
     log_levels = {
         'debug': logging.debug,
         'info': logging.info,

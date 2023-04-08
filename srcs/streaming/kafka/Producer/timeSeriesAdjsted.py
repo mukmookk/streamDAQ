@@ -7,13 +7,15 @@ import json
 import requests
 import os
 
-
-
 base_url = "https://www.alphavantage.co/query"
 symbol = "AAPL"
 api_key = os.environ.get('APIKEY')
 
 def getTimeSeriesDailyAdjusted(function="TIME_SERIES_DAILY_ADJUSTED", symbol="AAPL"):
+    """
+    function = function to be used
+    symbol = ticker to be used
+    """
     # API paramters
     params = {
         "function": function,
