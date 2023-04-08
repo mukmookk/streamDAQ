@@ -3,8 +3,6 @@ import time
 import requests
 import json
 import csv
-from pandas import json_normalize
-import pandas as pd
 # from kafka import KafkaProducer
 
 bootstrap_servers = ['localhost:9092']

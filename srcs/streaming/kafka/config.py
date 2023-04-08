@@ -8,4 +8,3 @@ filename = f"{WD}/logs/crawl_{timestamp}.log"
 
 logging.basicConfig(filename=filename, format='%(asctime)s %(levelname)s %(message)s')
 logging.getLogger().setLevel(logging.INFO)
-
