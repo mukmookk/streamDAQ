@@ -1,10 +1,10 @@
 FROM ubuntu:20.04
 LABEL maintainer="https://www.linkedin.com/in/sebastianruizmartinez/"
-WORKDIR /spark-demo
+WORKDIR /opt/predict
 
-ENV SPARK_HOME /spark-demo/spark
-ENV KAFKA_HOME /spark-demo/kafka
-ENV CASSANDRA_HOME /spark-demo/cassandra
+ENV SPARK_HOME /opt/predict/spark
+ENV KAFKA_HOME /opt/predict/kafka
+ENV CASSANDRA_HOME /opt/predict/cassandra
 
 RUN apt-get update
 RUN apt-get install -y openjdk-8-jdk-headless wget python python3-pip
