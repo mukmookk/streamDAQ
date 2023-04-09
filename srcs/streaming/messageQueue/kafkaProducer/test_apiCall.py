@@ -27,5 +27,4 @@ def test_importUtilsUtils():
 
 def test_pathInsertion():
     if not "/opt/streamDAQ/srcs" in sys.path:
-        print(sys.path)
         assert False, "Failed to insert python path"
