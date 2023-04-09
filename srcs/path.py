@@ -7,4 +7,4 @@ if root_dir not in sys.path:
     sys.path.insert(0, root_dir)
     print("Added {} to Python path".format(root_dir))
 
-print("Current Python path list: {}".format(sys.path))
+print("Already in Python path: {}".format(root_dir))
