@@ -23,7 +23,7 @@ def test_importUtilsUtils():
     try:
         from streaming.messageQueue.utils.util import reportLog
     except ImportError:
-        assert False, "Failed to import utils"
+        assert False, "There is no such module named util.reportLog"
 
 def test_pathInsertion():
     if not "/opt/streamDAQ/srcs" in sys.path:
