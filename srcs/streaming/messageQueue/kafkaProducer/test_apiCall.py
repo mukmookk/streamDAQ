@@ -9,19 +9,19 @@ def test_importStreaming():
 
 def test_importKafka():
     try:
-        import streaming.kafka
+        import streaming.messageQueue
     except:
         assert False, "Failed to import kafka"
 
 def test_importUtils():
     try:
-        import streaming.kafka.utils
+        import streaming.messageQueue.utils
     except:
         assert False, "Failed to import kafka"
 
 def test_importUtilsUtils():
     try:
-        from streaming.kafka.utils.utils import reportLog
+        from streaming.messageQueue.utils.util import reportLog
     except ImportError:
         assert False, "Failed to import utils"
 
