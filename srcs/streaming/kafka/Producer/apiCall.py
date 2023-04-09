@@ -3,7 +3,7 @@ import time
 import requests
 import json
 import csv
-from utils import reportLog
+from streaming.kafka.utils.utils import reportLog
 from kafka import KafkaProducer
 
 bootstrap_servers = ['localhost:9092']
