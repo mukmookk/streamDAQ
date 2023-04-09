@@ -3,7 +3,7 @@ import os
 
 root_dir = os.path.abspath(os.path.dirname(__file__))
 
-if root_dir not in sys.path:
+if root_dir not in sys.path[1:]:
     sys.path.insert(0, root_dir)
     print("Added {} to Python path".format(root_dir))
 else:
