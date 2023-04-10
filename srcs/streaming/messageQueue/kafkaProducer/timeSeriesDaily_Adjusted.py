@@ -15,10 +15,9 @@ def timeSeriesDailyAdjusted(symbol="AAPL"):
     """
     symbol = ticker to be used
     """
-    
     function="TIME_SERIES_DAILY_ADJUSTED"
-
     # API paramters
+
     params = {
         "function": function,
         "symbol": symbol,
