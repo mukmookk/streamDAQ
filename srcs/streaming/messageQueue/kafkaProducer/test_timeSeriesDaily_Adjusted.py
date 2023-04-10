@@ -1,105 +1,39 @@
-import time
-import config
-from kafka import KafkaProducer
-from time import sleep
-from json import dumps
 import json
+from unittest import mock
+
+import pytest
 import requests
-import os
 
-base_url = "https://www.alphavantage.co/query"
-symbol = "AAPL"
-api_key = os.environ.get('APIKEY')
+from main import timeSeriesDailyAdjusted
 
-def timeSeriesMonthly_Adjusted(symbol="AAPL"):
-    """
-    symbol = ticker to be used
-    """
-    function="TIME_SERIES_MONTHLY_ADJUSTED"
+def test_timeSeriesDailyAdjusted_returns_dict():
+    with mock.patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = {'Time Series (Daily)': {'2021-01-01': {}}}
 
-    # API paramters
-    params = {
-        "function": function,
-        "symbol": symbol,
-        "apikey": api_key,
-    }
+        result = timeSeriesDailyAdjusted(symbol='AAPL')
 
-    response = requests.get(base_url, params=params)
-    response_json = response.json()
+        assert isinstance(result, dict)
 
-    if 'Error Message' in response_json:
-        config.reportlog(f"Error fetching data from Alpha Vantage: {response_json['Error Message']}", "error")
-        raise Exception("Error fetching data from Alpha Vantage:" + response_json['Error Message'])
-    elif 'Note' in response_json:
-        config.reportlog(f"API call frequency limit reached: {response_json['Note']}", "error")
-        raise Exception("API call frequency limit reached: " + response_json['Note'])
-    elif 'Time Series (Daily)' not in response_json:
-        config.reportlog(f"Unexpected response from Alpha Vantage: {response_json}", "error")
-        raise Exception("Unexpected response from Alpha Vantage: ", response_json)
-    return response_json
 
-def main():
-    if api_key is None:
-        config.reportlog("Environment variable 'APIKEY' not found", "error")
-        raise ValueError("Environment variable 'APIKEY' not found")
-    else:
-        config.reportlog("API Key Successfully connected", 'info')
+def test_timeSeriesDailyAdjusted_with_error():
+    with mock.patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = {'Error Message': 'Test Error Message'}
 
-    response_json = timeSeriesMonthly_Adjusted()
-    # Connect to Kafka Producer
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
-                         value_serializer=lambda x: dumps(x).encode('utf-8'))
-                        
-    # Send message toward topic
-    future = producer.send('nasdaq_prices', 
-                           value=response_json)
-    config.reportlog("Message sent to Kafka", 'info')
-    
-    # time to wait for api limit (5 calls per minute)
-    start_time = time.time()
-    time_waited = 0
-    
-    # # Block until the message is sent and get the metadata
-    try:
-        record_metadata = future.get(timeout=10)
-        config.reportlog(f"Message sent successfully to {record_metadata.topic} "
-            f"partition {record_metadata.partition} "
-            f"offset {record_metadata.offset}", 'info')
-        # Log the data
-        config.reportlog(f"Symbol: {symbol} successfully reported", 'info')
-    except Exception as e:
-        error_msg = f"Error sending message: {e}"
-        config.reportlog(error_msg, 'error')
-    finally:
-        # Close the producer to flush any remaining messages
-        producer.close()
-        config.reportlog("close kafka producer process", 'info')
-    
-    while time.time() - start_time < 12:
-        time_waited += 1
-        time.sleep(1)
-    config.reportlog("Waited for {} seconds".format(time_waited), 'info')
+        with pytest.raises(Exception, match='Error fetching data from Alpha Vantage: Test Error Message'):
+            timeSeriesDailyAdjusted(symbol='AAPL')
 
-if __name__ == '__main__':
-    while (1):
-        main()
-def test_api_key():
-    assert main.api_key is not None
 
-def test_latest_price():
-    response_json = main.timeSeriesDailyAdjusted()
-    latest_price = main.getLatestPrice(response_json, "AAPL")
-    assert latest_price is not None
+def test_timeSeriesDailyAdjusted_with_note():
+    with mock.patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = {'Note': 'Test Note'}
 
-def test_kafka_producer():
-    response_json = main.timeSeriesDailyAdjusted()
-    latest_price = main.getLatestPrice(response_json, "AAPL")
-    producer = main.KafkaProducer(bootstrap_servers=['localhost:9092'],
-                                  value_serializer=lambda x: dumps(x).encode('utf-8'))
-    future = producer.send('nasdaq_prices', value=response_json)
-    record_metadata = future.get(timeout=10)
-    assert record_metadata is not None
-    future = producer.send('lastest_price', value=latest_price)
-    record_metadata = future.get(timeout=10)
-    assert record_metadata is not None
-    producer.close()
+        with pytest.raises(Exception, match='API call frequency limit reached: Test Note'):
+            timeSeriesDailyAdjusted(symbol='AAPL')
+
+
+def test_timeSeriesDailyAdjusted_with_unexpected_response():
+    with mock.patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = {}
+
+        with pytest.raises(Exception, match='Unexpected response from Alpha Vantage: {}'):
+            timeSeriesDailyAdjusted(symbol='AAPL')
