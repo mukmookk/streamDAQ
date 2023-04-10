@@ -9,23 +9,22 @@ def test_importStreaming():
 
 def test_importKafka():
     try:
-        import streaming.kafka
+        import streaming.messageQueue
     except:
         assert False, "Failed to import kafka"
 
 def test_importUtils():
     try:
-        import streaming.kafka.utils
+        import streaming.messageQueue.utils
     except:
         assert False, "Failed to import kafka"
 
 def test_importUtilsUtils():
     try:
-        from streaming.kafka.utils.utils import reportLog
+        from streaming.messageQueue.utils.util import reportLog
     except ImportError:
-        assert False, "Failed to import utils"
+        assert False, "There is no such module named util.reportLog"
 
 def test_pathInsertion():
     if not "/opt/streamDAQ/srcs" in sys.path:
-        print(sys.path)
         assert False, "Failed to insert python path"
