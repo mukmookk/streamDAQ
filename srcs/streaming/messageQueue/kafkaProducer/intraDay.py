@@ -53,7 +53,7 @@ def main():
         value_serializer=lambda x: dumps(x).encode('utf-8'),
         retries=5,
         acks='all'
-    )          
+    )   
     # Send message toward topic
     future = producer.send('nasdaq_prices', 
                            value=response_json)
