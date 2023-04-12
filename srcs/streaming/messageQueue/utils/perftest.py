@@ -2,7 +2,7 @@ from kafka import KafkaProducer
 from time import sleep
 import json
 
-producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=lambda x: json.dumps(x).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers=[bootstrap_servers], value_serializer=lambda x: json.dumps(x).encode('utf-8'))
 
 num_messages = 10000
 message_payload = {"message": "This is a test message."}

@@ -10,13 +10,13 @@ import os
 base_url = "https://www.alphavantage.co/query"
 symbol = "AAPL"
 api_key = os.environ.get('APIKEY')
+bootstrap_servers = os.environ.get('BOOTSTRAP_SERVERS')
 
 def timeSeriesDailyAdjusted(symbol="AAPL"):
     """
     symbol = ticker to be used
     """
     function="TIME_SERIES_DAILY_ADJUSTED"
-    # API paramters
 
     params = {
         "function": function,
@@ -71,7 +71,7 @@ def main():
     latest_price = getLatestPrice(response_json, "AAPL")
     # Connect to Kafka Producer
     producer = KafkaProducer(
-        bootstrap_servers=['localhost:9092'],
+        bootstrap_servers=[bootstrap_servers],
         value_serializer=lambda x: dumps(x).encode('utf-8'),
         retries=5,
         acks='all'

@@ -4,14 +4,14 @@ from kafka import KafkaConsumer
 import time
 
 def test_kafka_consumer():
-        producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
+        producer = KafkaProducer(bootstrap_servers=[bootstrap_servers],
                              value_serializer=lambda x: json.dumps(x).encode('utf-8'))
 
     # Send a test message to the nasdaq_prices topic
     test_message = {'test_key': 'test_value'}
     producer.send('nasdaq_prices', value=test_message)
 
-    consumer = KafkaConsumer('nasdaq_prices', bootstrap_servers=['localhost:9092'],
+    consumer = KafkaConsumer('nasdaq_prices', bootstrap_servers=[bootstrap_servers],
                              auto_offset_reset='latest',
                              value_deserializer=lambda x: json.loads(x.decode('utf-8')))
 

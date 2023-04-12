@@ -10,6 +10,7 @@ import os
 base_url = "https://www.alphavantage.co/query"
 symbol = "AAPL"
 api_key = os.environ.get('APIKEY')
+bootstrap_servers = os.environ.get('BOOTSTRAP_SERVERS')
 
 def timeSeriesMonthly(symbol="AAPL"):
     """
@@ -18,7 +19,6 @@ def timeSeriesMonthly(symbol="AAPL"):
 
     function="TIME_SERIES_MONTHLY"
 
-    # API paramters
     params = {
         "function": function,
         "symbol": symbol,
@@ -49,7 +49,7 @@ def main():
     response_json = timeSeriesMonthly()
     # Connect to Kafka Producer
     producer = KafkaProducer(
-        bootstrap_servers=['localhost:9092'],
+        bootstrap_servers=[bootstrap_servers],
         value_serializer=lambda x: dumps(x).encode('utf-8'),
         retries=5,
         acks='all'

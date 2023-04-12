@@ -1,14 +1,18 @@
 from alpha_vantage.timeseries import TimeSeries
 import time
+import os
 import requests
 import json
 import csv
 from streaming.messageQueue.utils.util import reportLog
 from kafka import KafkaProducer
 
-bootstrap_servers = ['localhost:9092']
-    producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
-                         value_serializer=lambda v: json.dumps(v).decode('utf-8'))
+bootstrap_servers = [bootstrap_servers]
+producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
+                         value_serializer=lambda v: json.dumps(v).decode('utf-8'),
+                         retries=5,
+                         acks='all')
+bootstrap_servers = os.environ.get('BOOTSTRAP_SERVERS')
 
 def earnings(key, ticker):
     """
