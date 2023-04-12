@@ -7,7 +7,7 @@ from streaming.messageQueue.utils.util import reportLog
 from kafka import KafkaProducer
 
 bootstrap_servers = ['localhost:9092']
-producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
+    producer = KafkaProducer(bootstrap_servers=bootstrap_servers, 
                          value_serializer=lambda v: json.dumps(v).decode('utf-8'))
 
 def earnings(key, ticker):

@@ -37,7 +37,7 @@ def mock_api_response():
 
 @pytest.fixture
 def producer():
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
+        producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                              value_serializer=lambda x: dumps(x).encode('utf-8'))
     yield producer
     producer.close()

@@ -4,7 +4,7 @@ from kafka import KafkaConsumer
 import time
 
 def test_kafka_consumer():
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
+        producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                              value_serializer=lambda x: json.dumps(x).encode('utf-8'))
 
     # Send a test message to the nasdaq_prices topic
