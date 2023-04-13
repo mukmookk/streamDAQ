@@ -7,14 +7,15 @@ import config
 
 bootstrap_servers = os.environ.get('BOOTSTRAP_SERVERS')
 consumer_group_id = 'cassandra_consumer'
-topic_name = 'intraDay'
-symbol = os.environ.get('SYMBOL')
 api_key = os.environ.get('APIKEY')
+username = os.environ.get('USERNAME')
+password = os.environ.get('PASSWORD')
+keyspace = os.environ.get('KEYSPACE')
 
 def connect_to_cassandra():
-    auth_provider = PlainTextAuthProvider(username='username', password='password')
-    cluster = Cluster(['127.0.0.1'], auth_provider=auth_provider)
-    session = cluster.connect('keyspace_name')
+    auth_provider = PlainTextAuthProvider(username=username, password=password)
+    cluster = Cluster([bootstrap_servers], auth_provider=auth_provider)
+    session = cluster.connect(keyspace)
     return session
 
 def insert_to_cassandra(session, data):
@@ -40,7 +41,9 @@ def main():
 
     # Connect to Kafka Consumer
     consumer = KafkaConsumer(
-        topic_name,
+        
+        
+        _name,
         bootstrap_servers=[bootstrap_servers],
         auto_offset_reset='earliest',
         enable_auto_commit=True,
