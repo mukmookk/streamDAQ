@@ -70,7 +70,6 @@ def main():
         config.reportlog(f"Message sent successfully to {record_metadata.topic} "
             f"partition {record_metadata.partition} "
             f"offset {record_metadata.offset}", 'info')
-        # Log the data
         config.reportlog(f"Symbol: {symbol} successfully reported", 'info')
     except Exception as e:
         error_msg = f"Error sending message: {e}"
