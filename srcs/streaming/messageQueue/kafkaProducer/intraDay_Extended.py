@@ -64,7 +64,6 @@ def main():
     start_time = time.time()
     time_waited = 0
     
-    # # Block until the message is sent and get the metadata
     try:
         record_metadata = future.get(timeout=10)
         config.reportlog(f"Message sent successfully to {record_metadata.topic} "
@@ -76,7 +75,6 @@ def main():
         error_msg = f"Error sending message: {e}"
         config.reportlog(error_msg, 'error')
     finally:
-        # Close the producer to flush any remaining messages
         producer.close()
         config.reportlog("close kafka producer process", 'info')
     
