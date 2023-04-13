@@ -11,6 +11,7 @@ api_key = os.environ.get('APIKEY')
 username = os.environ.get('USERNAME')
 password = os.environ.get('PASSWORD')
 keyspace = os.environ.get('KEYSPACE')
+topic = os.environ.get('TOPIC')
 
 def connect_to_cassandra():
     auth_provider = PlainTextAuthProvider(username=username, password=password)
@@ -41,9 +42,7 @@ def main():
 
     # Connect to Kafka Consumer
     consumer = KafkaConsumer(
-        
-        
-        _name,
+        topic,
         bootstrap_servers=[bootstrap_servers],
         auto_offset_reset='earliest',
         enable_auto_commit=True,
