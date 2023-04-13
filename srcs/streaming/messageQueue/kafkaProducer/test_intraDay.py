@@ -10,7 +10,7 @@ from json import dumps
 from app import timeSeriesIntraDay
 
 base_url = "https://www.alphavantage.co/query"
-symbol = "AAPL"
+symbol = os.environ.get('SYMBOL')
 api_key = os.environ.get('APIKEY')
 
 @pytest.fixture

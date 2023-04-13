@@ -8,7 +8,7 @@ import requests
 import os
 
 base_url = "https://www.alphavantage.co/query"
-symbol = "AAPL"
+symbol = os.environ.get('SYMBOL')
 api_key = os.environ.get('APIKEY')
 bootstrap_servers = os.environ.get('BOOTSTRAP_SERVERS')
 
