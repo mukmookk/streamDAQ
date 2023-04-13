@@ -9,7 +9,7 @@ from json import dumps
 
 from app import timeSeriesIntraDay
 
-base_url = "https://www.alphavantage.co/query"
+base_url = os.envion.get('BASE_URL')
 symbol = os.environ.get('SYMBOL')
 api_key = os.environ.get('APIKEY')
 
