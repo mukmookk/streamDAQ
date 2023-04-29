@@ -22,15 +22,16 @@ for i in range(len(weekly_list_text)):
 weekly_temp = []
 daily_temp = []
 for i in range(len(weekly_text)):
-    daily_temp = []
-    if "최고기온" in weekly_list[i]:
-        daily_temp.append(weekly_list[i][5:-2])
-    elif "최저기온" in weekly_list[i]:
-        daily_temp.append(weekly_list[i][5:-2])
-    
-    weekly_temp.append(daily_temp)
-    if len(daily_temp) == 2:
-        daily_temp = []
+    if "최고기온" in weekly_text[i] or "최저기온" in weekly_text[i]:
+        daily_temp.append(weekly_text[i][4:-1])
+        if len(daily_temp) == 2:
+            weekly_temp.append(daily_temp)
+            daily_temp = []
 
-print(weekly_text)
+day = "월화수목금토일"
+weekly_dict = {}
+for i in range(len(weekly_temp[3:])):
+    weekly_dict[day[i]] = weekly_temp[3:][i]
+
+print(weekly_dict['월'][1])
 
