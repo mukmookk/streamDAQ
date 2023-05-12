@@ -3,6 +3,7 @@ import json
 
 
 class Extractor:
+
     def __init__(self, ticker):
         self.ticker = yf.Ticker(ticker)
         self.metadata = {
@@ -19,9 +20,18 @@ class Extractor:
             'chartPreviousClose': '',
             'priceHint': '',
             'currentTradingPeriod': {
-                'pre': {'end': '', 'start': ''},
-                'regular': {'end': '', 'start': ''},
-                'post': {'end': '', 'start': ''}
+                'pre': {
+                    'end': '',
+                    'start': ''
+                },
+                'regular': {
+                    'end': '',
+                    'start': ''
+                },
+                'post': {
+                    'end': '',
+                    'start': ''
+                }
             },
             'dataGranularity': '',
             'range': '',
@@ -46,16 +56,23 @@ class Extractor:
             'priceHint': history_metadata['priceHint'],
             'currentTradingPeriod': {
                 'pre': {
-                    'end': history_metadata['currentTradingPeriod']['pre']['end'],
-                    'start': history_metadata['currentTradingPeriod']['pre']['start']
+                    'end':
+                    history_metadata['currentTradingPeriod']['pre']['end'],
+                    'start':
+                    history_metadata['currentTradingPeriod']['pre']['start']
                 },
                 'regular': {
-                    'end': history_metadata['currentTradingPeriod']['regular']['end'],
-                    'start': history_metadata['currentTradingPeriod']['regular']['start']
+                    'end':
+                    history_metadata['currentTradingPeriod']['regular']['end'],
+                    'start':
+                    history_metadata['currentTradingPeriod']['regular']
+                    ['start']
                 },
                 'post': {
-                    'end': history_metadata['currentTradingPeriod']['post']['end'],
-                    'start': history_metadata['currentTradingPeriod']['post']['start']
+                    'end':
+                    history_metadata['currentTradingPeriod']['post']['end'],
+                    'start':
+                    history_metadata['currentTradingPeriod']['post']['start']
                 }
             },
             'dataGranularity': history_metadata['dataGranularity'],
