@@ -53,7 +53,7 @@ class StreamingDataExtractor(Extractor):
             raise ValueError('get_soup: soup is None')
         return soup
 
-    def parse_for_yahoofinace(self, raw_string):
+    def parse_for_yahoofinance(self, raw_string):
         '''
         parse raw string from yahoo finance
         '''
@@ -86,7 +86,7 @@ class StreamingDataExtractor(Extractor):
             else:
                 self.last_update_time = datetime.now().strftime('%H:%M:%S')
                 break
-        parsed_data = self.parse_for_yahoofinace(price_element.text)
+        parsed_data = self.parse_for_yahoofinance(price_element.text)
         json_data = json.dumps(parsed_data)
         return json_data
    
