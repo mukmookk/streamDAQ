@@ -1,65 +1,87 @@
 import pytest
-from unittest.mock import MagicMock
-from data_pipeline.extraction.extractor import Extractor
+from datetime import datetime
+from unittest.mock import Mock, patch
+from extractor import StreamingDataExtractor
 
+TARGET_URL = "https://finance.yahoo.com/quote/AAPL"
 
 @pytest.fixture
-def extractor():
-    ticker_mock = MagicMock()
-    ticker_mock.history_metadata = {
-        'currency': 'USD',
-        'symbol': 'MSFT',
-        'exchangeName': 'NMS',
-        'instrumentType': 'EQUITY',
-        'firstTradeDate': '2023-05-12',
-        'regularMarketTime': '2023-05-12',
-        'gmtoffset': -14400,
-        'timezone': 'EDT',
-        'exchangeTimezoneName': 'America/New_York',
-        'regularMarketPrice': 310.11,
-        'chartPreviousClose': 282.83,
-        'priceHint': 2,
-        'currentTradingPeriod': {
-            'pre': {'end': '2023-05-12', 'start': '2023-05-12'},
-            'regular': {'end': '2023-05-12', 'start': '2023-05-12'},
-            'post': {'end': '2023-05-12', 'start': '2023-05-12'}
-        },
-        'dataGranularity': '1d',
-        'range': '1mo',
-        'validRanges': ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']
+def streaming_extractor():
+    '''
+    mock StreamingDataExtractor
+    '''
+    return StreamingDataExtractor("TSLA", TARGET_URL)
+
+def test_get_response(streaming_extractor):
+    '''
+    test get_response
+    '''
+    with patch("requests.get") as mock_get:
+        mock_response = Mock()
+        mock_response.text = "Mocked Response"
+        mock_get.return_value = mock_response
+
+        response = streaming_extractor.get_response()
+
+        assert response.text == "Mocked Response"
+        mock_get.assert_called_once_with(TARGET_URL, timeout=60)
+
+def test_get_response_exception(streaming_extractor, caplog):
+    '''
+    test get_response exception
+    '''
+    with patch("requests.get") as mock_get:
+        mock_get.side_effect = Exception("Test Exception")
+
+        with pytest.raises(ValueError):
+            streaming_extractor.get_response()
+
+        assert "get_response: Test Exception" in caplog.text
+
+def test_get_soup(streaming_extractor):
+    streaming_extractor.response = Mock()
+    streaming_extractor.response.text = "<html><body><p>Hello, World!</p></body></html>"
+
+    soup = streaming_extractor.get_soup()
+
+    assert soup.find("p").text == "Hello, World!"
+
+def test_get_soup_exception(streaming_extractor, caplog):
+    streaming_extractor.response = Mock()
+    streaming_extractor.response.text = ""
+
+    with pytest.raises(ValueError):
+        streaming_extractor.get_soup()
+
+    assert "get_soup: soup is None" in caplog.text
+
+def test_parse_for_yahoofinance(streaming_extractor):
+    raw_string = "+$100 (5%) Last Trade: 10:00 AM"
+    expected_result = {
+        "price": "+$100",
+        "change": "+$100",
+        "change_percent": "5%",
+        "last_trade_time": "10:00 AM"
     }
 
-    ticker_mock.history.return_value = None
+    result = streaming_extractor.parse_for_yahoofinance(raw_string)
 
-    extractor = Extractor('MSFT')
-    extractor.ticker = ticker_mock
-
-    return extractor
+    assert result == expected_result
 
 
-class TestExtractor:
-    def test_setTickerHistInfo(self, extractor):
-        extractor.setTickerHistInfo()
+def test_fetch_realtime_data(streaming_extractor):
+    '''
+    test fetch_realtime_data
+    '''
+    streaming_extractor.last_update_time = datetime.now().strftime('%H:%M:%S')
+    streaming_extractor.soup = Mock()
+    streaming_extractor.soup.find.return_value = Mock()
+    streaming_extractor.soup.find.return_value.text = "+$100 (5%) Last Trade: 10:00 AM"
+    expected_json_data = '{"price": "+$100", "chagne": "+$100", \
+                                "change_percent": "5%", "last_trade_time": "10:00 AM"}'
+    json_data = streaming_extractor.fetch_realtime_data()
 
-        assert extractor.metadata['currency'] == 'USD'
-        assert extractor.metadata['symbol'] == 'MSFT'
-        assert extractor.metadata['exchangeName'] == 'NMS'
-        assert extractor.metadata['instrumentType'] == 'EQUITY'
-        assert extractor.metadata['firstTradeDate'] == '2023-05-12'
-        assert extractor.metadata['regularMarketTime'] == '2023-05-12'
-        assert extractor.metadata['gmtoffset'] == -14400
-        assert extractor.metadata['timezone'] == 'EDT'
-        assert extractor.metadata['exchangeTimezoneName'] == 'America/New_York'
-        assert extractor.metadata['regularMarketPrice'] == 310.11
-        assert extractor.metadata['chartPreviousClose'] == 282.83
-        assert extractor.metadata['priceHint'] == 2
-        assert extractor.metadata['currentTradingPeriod']['pre']['end'] == '2023-05-12'
-        assert extractor.metadata['currentTradingPeriod']['pre']['start'] == '2023-05-12'
-        assert extractor.metadata['currentTradingPeriod']['regular']['end'] == '2023-05-12'
-        assert extractor.metadata['currentTradingPeriod']['regular']['start'] == '2023-05-12'
-        assert extractor.metadata['currentTradingPeriod']['post']['end'] == '2023-05-12'
-        assert extractor.metadata['currentTradingPeriod']['post']['start'] == '2023-05-12'
-        assert extractor.metadata['dataGranularity'] == '1d'
-        assert extractor.metadata['range'] == '1mo'
-        assert extractor.metadata['validRanges'] == [
-            '1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']
+    assert json_data == expected_json_data
+
+# Run pytest
+pytest.main()
