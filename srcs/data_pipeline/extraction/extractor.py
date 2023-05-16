@@ -251,8 +251,12 @@ class HistoricalDataExtractor(Extractor):
             close = low.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
             adjclose = close.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
             volume = adjclose.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
+            
+            input_format = '%b %d, %Y'
+            output_format = '%Y-%m-%d'
+            date = datetime.strptime(date.text, input_format).strftime(output_format)
             parsed_item = {
-                "date": date.text,
+                "date": date,
                 "open": open.text,
                 "high": high.text,
                 "low": low.text,
