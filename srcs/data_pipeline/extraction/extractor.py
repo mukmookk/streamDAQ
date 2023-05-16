@@ -8,33 +8,41 @@ import json
 import sys
 import re
 import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-
+    
 class Extractor:
-    '''
-    super class for extractor
-    '''
+    """
+    common class for extractor
+    """
     def __init__(self, ticker):
         self.ticker = ticker
-
-class StreamingDataExtractor(Extractor):
-    '''
-    class for streaming data extractor
-    '''
-    def __init__(self, ticker, url):
-        super().__init__(ticker)
-        self.url = url
-        self.response = self.get_response()
-        self.soup = self.get_soup()
-        self.last_update_time = None
-        self.retries = 10
-
-    def get_response(self):
-        '''
+        self.header = {
+            "User-Agent": 
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                    AppleWebKit/537.36 (KHTML, like Gecko) \
+                        Chrome/94.0.4606.71 Safari/537.36"
+        }
+        
+    def get_response(self, role):
+        """_summary_
         get response from url
-        '''
+        Args:
+            role (_type_): ['realtime', 'profile', 'financials', 'statistics', 'historical']
+
+        Raises:
+            ValueError: if response is None
+            ValueError: if soup is None
+
+        Returns:
+            _type_: _description_
+        """
+        url = self.update_url(role)
         try:
-            response = requests.get(self.url, timeout=60)
+            response = requests.get(url, headers=self.header, timeout=60)
             if response is None:
                 logging.error('get_response: response is None')
                 raise ValueError('get_response: response is None')
@@ -42,51 +50,161 @@ class StreamingDataExtractor(Extractor):
             logging.error('get_response: %s', exception)
             raise ValueError('get_soup: soup is None') from exception
         return response
-
-    def get_soup(self):
-        '''
+    
+    def get_soup(self, role):
+        """_summary_
         get soup from response
-        '''
-        soup = BeautifulSoup(self.response.text, 'html.parser')
+        Args:
+            role (_type_): ['realtime', 'profile', 'financials', 'statistics', 'historical']
+
+        Raises:
+            ValueError: if soup is None
+
+        Returns:
+            _type_: _description_
+        """
+        response = self.get_response(role)
+        soup = BeautifulSoup(response.content, 'html.parser')
         if soup is None:
             logging.error('get_soup: soup is None')
             raise ValueError('get_soup: soup is None')
         return soup
 
-    def parse_for_yahoofinance(self, raw_string):
-        '''
+    def update_url(self, role):
+        """_summary_
+        return url for different roles
+        Args:
+            role (str): ['realtime', 'profile', 'financials', 'statistics', 'historical']
+
+        Returns:
+            str: url
+        """
+        if not role in ['realtime', 'profile', 'financials', 'statistics', 'historical']:
+            return False
+        ticker = self.ticker
+        if role == 'realtime':
+            url = 'https://finance.yahoo.com/quote/' + ticker
+        elif role == 'financials':
+            url = 'https://finance.yahoo.com/quote/' + ticker + '/financials?p=' + ticker
+        elif role == 'statistics':
+            url = 'https://finance.yahoo.com/quote/' + ticker + '/key-statistics?p=' + ticker
+        elif role == 'historical':
+            url = 'https://finance.yahoo.com/quote/' + ticker + '/history?p=' + ticker
+
+        return url
+    
+    def save_json(self, output_file, json_data):
+        """_summary_
+        save json data to output file
+        Args:
+            output_file (str): output file
+            json_data (json): json data
+        """
+        with open(output_file, 'w', encoding='utf-8') as json_file:
+            json.dump(json_data, json_file)
+    
+    # def control_selenium_drive(self, )
+
+class StreamingDataExtractor(Extractor):
+    """_summary_
+    init StreamingDataExtractor
+    Args:
+        Extractor (_type_): super class of StreamingDataExtractor
+    """
+    def __init__(self, ticker):
+        super().__init__(ticker)
+        self.retries = 10
+        self.response = None
+        self.last_update_time = None
+
+    def parse_for_realtime_data(self, raw_string):
+        """_summary_
         parse raw string from yahoo finance
-        '''
+        Args:
+            raw_string (str): raw string from yahoo finance
+
+        Returns:
+            dict: parsed from raw string
+        """
         pattern = r'[+\s()%A-Za-z]'
         string = raw_string.strip()
         lst = re.split(pattern, string)
         lst = [x for x in lst if x != '']
         price, change, change_percent, trade_time = lst[0:4]
+        msg = 'Market Open'
+        if trade_time == ':':
+            trade_time = datetime.now().strftime('04:00')
+            msg = 'Market Closed'        
         return {
             'price': price,
-            'chagne': change,
+            'change': change,
             'change_percent': change_percent,
-            'last_trade_time': trade_time
+            'last_trade_time': trade_time,
+            'msg': msg
         }
 
     def fetch_realtime_data(self):
-        '''
-        fetch real time data from yahoo finance
-        '''
+        """_summary_
+        fetch realtime data from yahoo finance
+        Raises:
+            ValueError: if soup is None
+
+        Returns:
+            json: realtime data in json format
+        """
         tries = 0
         while tries < self.retries:
             if tries == self.retries:
                 logging.error('fetch_realtime_data: No update')
                 logging.error('fetch_realtime_data: last_update_time: %s', self.last_update_time)
                 sys.exit(0)
-            price_element = self.soup.find('div', {'class': 'D(ib) Mend(20px)'})
+            soup = self.get_soup('realtime')
+            price_element = soup.find('div', class_='D(ib) Mend(20px)')
             if price_element is None:
                 tries += 1
                 logging.error('fetch_realtime_data: price_element is None. Retry %s', tries)
             else:
                 self.last_update_time = datetime.now().strftime('%H:%M:%S')
                 break
-        parsed_data = self.parse_for_yahoofinance(price_element.text)
+        parsed_data = self.parse_for_realtime_data(price_element.text)
         json_data = json.dumps(parsed_data)
-        return json_data
+        return json_data        
+
+class HistoricalDataExtractor(Extractor):
+    def __init__(self, ticker):
+        super().__init__(ticker)
+        
+    def fetch_historical_data(self):
+        soup = self.get_soup('historical')
+        price_element = soup.find('table', {'class': 'W(100%) M(0)'})
+        history_data = []
+        
+        while True:
+            row = price_element.find_next('tr', {'class': 'BdT Bdc($seperatorColor) Ta(end) Fz(s) Whs(nw)'})
+            if row is None:
+                break
+            date = row.find_next('td', {'class': 'Py(10px) Ta(start) Pend(10px)'})
+            open = date.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
+            high = open.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
+            low = high.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
+            close = low.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
+            adjclose = close.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
+            volume = adjclose.find_next('td', {'class': 'Py(10px) Pstart(10px)'})
+            parsed_item = {
+                "date": date.text,
+                "open": open.text,
+                "high": high.text,
+                "low": low.text,
+                "close": close.text,
+                "adjclose": adjclose.text,
+                "volume": volume.text
+            }
+            print(parsed_item)
+            history_data.append(parsed_item)
+            price_element = row
+        
+        # parsed_data = dict(map(lambda x : parse_for_historical_data, history_data))
+        return history_data
+        
+
    
