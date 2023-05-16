@@ -8,10 +8,12 @@ import json
 import sys
 import re
 import requests
+from contextlib import contextmanager
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from bs4 import BeautifulSoup
     
 class Extractor:
@@ -19,6 +21,12 @@ class Extractor:
     common class for extractor
     """
     def __init__(self, ticker):
+        """_summary_
+        init method of HistoricalDataExtractor
+        Args:
+            ticker (str): ticker of stock
+            header (dict): header for request
+        """
         self.ticker = ticker
         self.header = {
             "User-Agent": 
@@ -26,21 +34,21 @@ class Extractor:
                     AppleWebKit/537.36 (KHTML, like Gecko) \
                         Chrome/94.0.4606.71 Safari/537.36"
         }
-        
+                
     def get_response(self, role):
         """_summary_
         get response from url
         Args:
-            role (_type_): ['realtime', 'profile', 'financials', 'statistics', 'historical']
+            role (str): one of ['realtime', 'profile', 'financials', 'statistics', 'historical']
 
         Raises:
             ValueError: if response is None
             ValueError: if soup is None
 
         Returns:
-            _type_: _description_
+            response: response from url
         """
-        url = self.update_url(role)
+        url = self.get_target_url(role)
         try:
             response = requests.get(url, headers=self.header, timeout=60)
             if response is None:
@@ -70,7 +78,7 @@ class Extractor:
             raise ValueError('get_soup: soup is None')
         return soup
 
-    def update_url(self, role):
+    def get_target_url(self, role):
         """_summary_
         return url for different roles
         Args:
@@ -103,15 +111,50 @@ class Extractor:
         with open(output_file, 'w', encoding='utf-8') as json_file:
             json.dump(json_data, json_file)
     
-    # def control_selenium_drive(self, )
-
+    @contextmanager
+    def chrome_driver(self, url):
+        driver = None
+        try:
+            driver = webdriver.Chrome()
+            driver.get(url)
+            yield driver
+        finally:
+            if driver:
+                driver.quit()
+    
+    def click_button_selenuim_driver(self, url, target_element):
+        with self.chrome_driver(url) as driver:
+            try:
+                button = driver.find_element(By.CSS_SELECTOR, target_element)
+                button.click()
+            except NoSuchElementException:
+                logging.error('click_button_selenuim_driver: NoSuchElementException')
+                exit(1)
+            except TimeoutException:
+                logging.error('click_button_selenuim_driver: TimeoutException')
+                exit(1)
+    
+    def validate_selenuim_selector(self, url, button):
+        with self.chrome_driver(url) as driver:
+            try:
+                button = driver.find_element(By.CSS_SELECTOR, button)
+                button.click()
+                print("Button found")
+            except NoSuchElementException:
+                print("Button not found")
+    
 class StreamingDataExtractor(Extractor):
     """_summary_
     init StreamingDataExtractor
     Args:
-        Extractor (_type_): super class of StreamingDataExtractor
+        Extractor (class): super class of StreamingDataExtractor
     """
     def __init__(self, ticker):
+        """_summary_
+        init method of StreamingDataExtractor
+        Args:
+            ticker (str): ticker of stock
+        """
         super().__init__(ticker)
         self.retries = 10
         self.response = None
@@ -145,7 +188,7 @@ class StreamingDataExtractor(Extractor):
 
     def fetch_realtime_data(self):
         """_summary_
-        fetch realtime data from yahoo finance
+        Stream data from yahoo finance, direct to kafka producer
         Raises:
             ValueError: if soup is None
 
@@ -168,17 +211,35 @@ class StreamingDataExtractor(Extractor):
                 break
         parsed_data = self.parse_for_realtime_data(price_element.text)
         json_data = json.dumps(parsed_data)
+        
+        # ** 추후 kafka producer와 연결 **
         return json_data        
 
 class HistoricalDataExtractor(Extractor):
+    """_summary_
+    
+    Args:
+        Extractor (_type_): super class of HistoricalDataExtractor
+    """
     def __init__(self, ticker):
+        """_summary_
+        init method of HistoricalDataExtractor
+        Args:
+            ticker (str): ticker of stock
+        """
         super().__init__(ticker)
         
-    def fetch_historical_data(self):
+    def fetch_historical_data(self, output_path, duration='1sec'):
+        """_summary_
+        fetch historical data from yahoo finance, save to output file
+        Returns:
+            json: historical data in json format
+        """
         soup = self.get_soup('historical')
         price_element = soup.find('table', {'class': 'W(100%) M(0)'})
         history_data = []
-        
+        # button_element = 'button.Py(5px).W(45px).Fz(s).C($tertiaryColor).Cur(p).Bd.Bdc($seperatorColor).Bgc($lv4BgColor).Bdc($linkColor):h.Bdrs(3px)[data-value="MAX"]'
+        # self.click_button_selenuim_driver(self.get_target_url('historical'), button_element)
         while True:
             row = price_element.find_next('tr', {'class': 'BdT Bdc($seperatorColor) Ta(end) Fz(s) Whs(nw)'})
             if row is None:
@@ -199,12 +260,12 @@ class HistoricalDataExtractor(Extractor):
                 "adjclose": adjclose.text,
                 "volume": volume.text
             }
-            print(parsed_item)
             history_data.append(parsed_item)
             price_element = row
         
-        # parsed_data = dict(map(lambda x : parse_for_historical_data, history_data))
-        return history_data
+        self.save_json(output_path, history_data)
+        logging.info('fetch_historical_data: successfully saved historical data to %s', output_path)
+        return "successfully saved historical data to " + output_path
         
 
    

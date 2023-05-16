@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 from unittest.mock import Mock, patch
-from extractor import StreamingDataExtractor
+from data_pipeline.extraction.extractor import StreamingDataExtractor
 
 TARGET_URL = "https://finance.yahoo.com/quote/AAPL"
 
@@ -10,7 +10,7 @@ def streaming_extractor():
     '''
     mock StreamingDataExtractor
     '''
-    return StreamingDataExtractor("TSLA", TARGET_URL)
+    return StreamingDataExtractor("AAPL", TARGET_URL)
 
 def test_get_response(streaming_extractor):
     '''
@@ -77,7 +77,7 @@ def test_fetch_realtime_data(streaming_extractor):
     streaming_extractor.soup = Mock()
     streaming_extractor.soup.find.return_value = Mock()
     streaming_extractor.soup.find.return_value.text = "+$100 (5%) Last Trade: 10:00 AM"
-    expected_json_data = '{"price": "+$100", "chagne": "+$100", \
+    expected_json_data = '{"price": "+$100", "change": "+$5", \
                                 "change_percent": "5%", "last_trade_time": "10:00 AM"}'
     json_data = streaming_extractor.fetch_realtime_data()
 
