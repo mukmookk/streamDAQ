@@ -1,7 +1,6 @@
 # StreamDAQ
 
-Welcome to the **StremDAQ** repository! This project is a personal endeavor aimed at exploring and solving data engineering challenges that pique my curiosity using financial data.
-
+In this toy project, I am revamping the existing architecture to address the limitations and challenges encountered during its initial implementation. By rebuilding from the bottom up, I have the opportunity to reevaluate design decisions, incorporate the latest industry best practices, and introduce new technologies that align with my vision for the project.
 
 ## Table of Contents
 
@@ -12,7 +11,17 @@ Welcome to the **StremDAQ** repository! This project is a personal endeavor aime
 
 ## Project Description
 
-As a data engineer, I constantly seek opportunities to enhance my skills and expand my knowledge in the field. This repository serves as a platform where I explore various data engineering concepts, experiment with different technologies, and develop small projects to tackle interesting challenges.
+As a pre-data engineer, I constantly seek opportunities to enhance my skills and expand my knowledge in the field. This repository serves as a platform where I explore various data engineering concepts, experiment with different technologies, and develop small projects to tackle interesting challenges.
+
+## Goals
+- Enhancing performance to handle large-scale data processing more efficiently.
+- Improving scalability to accommodate growing data volumes and user base.
+- Enhancing fault tolerance and resilience to ensure high availability.
+- Simplifying the codebase and improving maintainability for easier development and troubleshooting.
+- Incorporating modern architectural patterns and design principles.
+- Adopting the latest technologies and frameworks that better suit our requirements.
+
+I'm excited about this rebuilding process as it provides us with a unique opportunity to learn and apply advanced data engineering concepts. I look forward to gaining a deeper understanding of data engineering principles, such as data integration, data pipelines, data quality, and more.
 
 ## Technologies Used
 
@@ -40,10 +49,13 @@ As a data engineer, I constantly seek opportunities to enhance my skills and exp
 ## Installation
 
 1. Clone the repository:
+
 ```
 git clone https://github.com/your-username/project-name.git
 ```
+
 2. Install the required dependencies:
+
 ```
 pip install -r requirements.txt
 ```
