@@ -40,9 +40,10 @@ As a data engineer, I constantly seek opportunities to enhance my skills and exp
 ## Installation
 
 1. Clone the repository:
-
+```
 git clone https://github.com/your-username/project-name.git
-
+```
 2. Install the required dependencies:
-
+```
 pip install -r requirements.txt
+```
