@@ -51,7 +51,7 @@ I'm excited about this rebuilding process as it provides us with a unique opport
 1. Clone the repository:
 
 ```
-git clone https://github.com/your-username/project-name.git
+git clone https://github.com/mukmookk/streamDAQ.git
 ```
 
 2. Install the required dependencies:
