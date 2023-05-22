@@ -38,11 +38,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   
   python-app:
-    image: ghcr.io/mukmookk/streamdaq-python:latest
-    depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
+    image: ghcr.io/mukmookk/streamdaq-python:0522
     environment:
       KAFKA_BROKER_1: kafka1:9092
       KAFKA_BROKER_2: kafka2:9093
