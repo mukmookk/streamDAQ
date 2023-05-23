@@ -4,7 +4,7 @@ from confluent_kafka import Producer
 
 class KafkaProducer():
     def __init__(self, bootstrap_server, bootstrap_port, mode):
-        self.bootstrap_server = bootstrap_server
+        self.bootstrap_server = f'{bootstrap_server}:{bootstrap_port}'
         
         if mode == 'streaming':
             self.producer = Producer({
