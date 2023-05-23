@@ -3,11 +3,32 @@ import json
 from confluent_kafka import Producer
 
 class KafkaProducer():
-    def __init__(self, hostname, port):
-        self.hostnaem = hostname
-        self.port = port
-        self.producer = Producer({'bootstrap.servers': f'{self.hostnaem}:{self.port}'})
-
+    def __init__(self, bootstrap_server, bootstrap_port, mode):
+        self.bootstrap_server = bootstrap_server
+        
+        if mode == 'streaming':
+            self.producer = Producer({
+                'bootstrap.servers': self.bootstrap_server,
+                'linger.ms': 100,
+                'batch.num.messages': 1000,
+                'queue.buffering.max.messages': 100000,
+                'queue.buffering.max.ms': 1000,
+                'queue.buffering.max.kbytes': 1000000,
+                'compression.type': 'gzip'
+            })
+        elif mode == 'batch':
+            self.producer = Producer({
+                'bootstrap.servers': self.bootstrap_server,
+                'linger.ms': 100,
+                'batch.num.messages': 1000,
+                'queue.buffering.max.messages': 100000,
+                'queue.buffering.max.ms': 1000,
+                'queue.buffering.max.kbytes': 1000000,
+                'compression.type': 'gzip'
+            })
+        else:
+            raise ValueError('Invalid mode. Expected streaming or batch')
+    
     def delivery_report(self, err, msg):
         if err is not None:
             print('Message delivery failed: {}'.format(err))
@@ -32,9 +53,4 @@ class KafkaProducer():
         for item in data:
             self.produce(topic, item)
         self.producer.flush()
-        
-    def flush(self):
-        self.producer.flush()
 
-if __name__ == "__main__":
-    pass
