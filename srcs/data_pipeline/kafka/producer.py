@@ -19,10 +19,10 @@ class KafkaProducer():
         elif mode == 'batch':
             self.producer = Producer({
                 'bootstrap.servers': self.bootstrap_server,
-                'linger.ms': 100,
-                'batch.num.messages': 1000,
-                'queue.buffering.max.messages': 100000,
-                'queue.buffering.max.ms': 1000,
+                'linger.ms': 10000,
+                'batch.num.messages': 10000,
+                'queue.buffering.max.messages': 1000000,
+                'queue.buffering.max.ms': 10000,
                 'queue.buffering.max.kbytes': 1000000,
                 'compression.type': 'gzip'
             })
