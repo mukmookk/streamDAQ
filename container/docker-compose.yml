@@ -1,6 +1,14 @@
 version: '3'
 
 services:
+  python-app:
+    image: ghcr.io/mukmookk/streamdaq-python:0522
+    command: tail -f /dev/null
+    environment:
+      KAFKA_BROKER_1: kafka1:9092
+      KAFKA_BROKER_2: kafka2:9093
+      KAFKA_BROKER_3: kafka3:9094
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -36,10 +44,4 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9094
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  
-  python-app:
-    image: ghcr.io/mukmookk/streamdaq-python:0522
-    environment:
-      KAFKA_BROKER_1: kafka1:9092
-      KAFKA_BROKER_2: kafka2:9093
-      KAFKA_BROKER_3: kafka3:9094
+
