@@ -45,3 +45,37 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9094
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+  cassandra1:
+    image: cassandra:latest
+    environment:
+      CASSANDRA_SEEDS: cassandra1,cassandra2,cassandra3
+    volumes:
+      - cassandra1-data:/var/lib/cassandra/data
+
+  cassandra2:
+    image: cassandra:latest
+    environment:
+      CASSANDRA_SEEDS: cassandra1,cassandra2,cassandra3
+    volumes:
+      - cassandra2-data:/var/lib/cassandra/data
+
+  cassandra3:
+    image: cassandra:latest
+    environment:
+      CASSANDRA_SEEDS: cassandra1,cassandra2,cassandra3
+    volumes:
+      - cassandra3-data:/var/lib/cassandra/data
+
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - mysql1-data:/var/lib/mysql
+
+volumes:
+  cassandra1-data:
+  cassandra2-data:
+  cassandra3-data:
+  mysql-data:
+
