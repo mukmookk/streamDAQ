@@ -15,8 +15,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from bs4 import BeautifulSoup
-    
-class Extractor:
+from data_pipeline.extraction.interface import ExtractorInterface
+  
+class Extractor(ExtractorInterface):
     """
     common class for extractor
     """
