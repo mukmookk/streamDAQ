@@ -1,5 +1,5 @@
-from data_pipeline.extraction.extractor import StreamingDataExtractor
 import json
+import logging
 from confluent_kafka import Producer
 
 class KafkaProducer():
@@ -31,9 +31,9 @@ class KafkaProducer():
     
     def delivery_report(self, err, msg):
         if err is not None:
-            print('Message delivery failed: {}'.format(err))
+            logging.error('Message delivery failed: {}'.format(err))
         else:
-            print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+            logging.info('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
 
     def produce(self, topic, data):
         self.producer.produce(topic, data.encode('utf-8'), callback=self.delivery_report)
