@@ -37,7 +37,7 @@ class KafkaProducer():
 
     def produce(self, topic, data):
         self.producer.produce(topic, data.encode('utf-8'), callback=self.delivery_report)
-        self.producer.poll(0)
+        self.producer.poll()
         
     def produce_msg_from_file(self, file_path, topic):
         with open(file_path, encoding='utf-8') as json_file:
