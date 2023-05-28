@@ -1,6 +1,6 @@
 import pytest
 import logging
-from . import config
+from . from utils.util import config
 
 def test_reportlog(caplog):
     msg = 'Test log message'

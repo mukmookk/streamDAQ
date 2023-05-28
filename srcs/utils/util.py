@@ -1,5 +1,5 @@
 import logging
-from . import config
+from . from utils.util import config
 
 def reportLog(msg, level):
     """
