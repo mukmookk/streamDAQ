@@ -15,13 +15,13 @@ def test_importKafka():
 
 def test_importUtils():
     try:
-        import streaming.messageQueue.utils
+        import utils
     except:
         assert False, "Failed to import kafka"
 
 def test_importUtilsUtils():
     try:
-        from streaming.messageQueue.utils.util import reportLog
+        from utils.util import reportLog
     except ImportError:
         assert False, "There is no such module named util.reportLog"
 

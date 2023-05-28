@@ -1,5 +1,5 @@
 import time
-import config
+from utils.util import config
 from kafka import KafkaProducer
 from time import sleep
 from json import dumps

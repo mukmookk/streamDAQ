@@ -4,7 +4,7 @@ import os
 import requests
 import json
 import csv
-from streaming.messageQueue.utils.util import reportLog
+from utils.util import reportLog
 from kafka import KafkaProducer
 
 bootstrap_servers = [bootstrap_servers]
