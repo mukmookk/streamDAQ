@@ -85,6 +85,49 @@ services:
       CASSANDRA_SEEDS: cassandra1,cassandra2,cassandra3
     volumes:
       - cassandra3-data:/var/lib/cassandra/data
+      
+  postgres_airflow:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=${AIRFLOW_DB_PASSWORD}
+      - POSTGRES_DB=airflow
+
+  postgres_app:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD=${APP_DB_PASSWORD}
+      - POSTGRES_DB=app
+
+  webserver:
+    image: apache/airflow:latest
+    restart: always
+    depends_on:
+      - postgres_airflow
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD}@postgres_airflow/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+    ports:
+      - "8080:8080"
+    command: webserver
+
+  scheduler:
+    image: apache/airflow:latest
+    restart: always
+    depends_on:
+      - postgres_airflow
+      - webserver
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD}@postgres_airflow/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+    command: scheduler
 
 
 volumes:
