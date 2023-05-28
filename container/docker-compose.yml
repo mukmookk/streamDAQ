@@ -66,16 +66,9 @@ services:
     volumes:
       - cassandra3-data:/var/lib/cassandra/data
 
-  mysql:
-    image: mysql:latest
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-    volumes:
-      - mysql1-data:/var/lib/mysql
 
 volumes:
   cassandra1-data:
   cassandra2-data:
   cassandra3-data:
-  mysql-data:
 
