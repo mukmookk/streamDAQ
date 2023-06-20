@@ -1,0 +1,118 @@
+version: '3'
+
+services:
+  # python-app:
+  #   image: ghcr.io/mukmookk/streamdaq-python:0522
+  #   command: tail -f /dev/null
+  #   environment:
+  #     KAFKA_BROKER_1: kafka1:9092
+  #     KAFKA_BROKER_2: kafka2:9093
+  #     KAFKA_BROKER_3: kafka3:9094
+    
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:latest
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+
+  # kafka1:
+  #   image: confluentinc/cp-kafka:latest
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+#   kafka2:
+#     image: confluentinc/cp-kafka:latest
+#     depends_on:
+#       - zookeeper
+#     environment:
+#       KAFKA_BROKER_ID: 2
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9093
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+#   kafka3:
+#     image: confluentinc/cp-kafka:latest
+#     depends_on:
+#       - zookeeper
+#     environment:
+#       KAFKA_BROKER_ID: 3
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9094
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+#   cassandra1:
+#     image: cassandra:latest
+#     environment:
+#       CASSANDRA_SEEDS: cassandra1,cassandra2,cassandra3
+#     volumes:
+#       - cassandra1-data:/var/lib/cassandra/data
+
+#   cassandra2:
+#     image: cassandra:latest
+#     environment:
+#       CASSANDRA_SEEDS: cassandra1,cassandra2,cassandra3
+#     volumes:
+#       - cassandra2-data:/var/lib/cassandra/data
+
+#   cassandra3:
+#     image: cassandra:latest
+#     environment:
+#       CASSANDRA_SEEDS: cassandra1,cassandra2,cassandra3
+#     volumes:
+#       - cassandra3-data:/var/lib/cassandra/data
+  
+  postgres_airflow:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=${AIRFLOW_DB_PASSWORD}
+      - POSTGRES_DB=airflow
+
+  # postgres_app:
+  #   image: postgres:latest
+  #   environment:
+  #     - POSTGRES_USER=app
+  #     - POSTGRES_PASSWORD=${APP_DB_PASSWORD}
+  #     - POSTGRES_DB=app
+
+  webserver:
+    image: apache/airflow:latest
+    restart: always
+    depends_on:
+      - postgres_airflow
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD}@postgres_airflow/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "airflow db init && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email mukmookk@gmail.com && airflow webserver"
+
+  scheduler:
+    image: apache/airflow:latest
+    restart: always
+    depends_on:
+      - postgres_airflow
+      - webserver
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD}@postgres_airflow/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+    command: scheduler
+
+
+# volumes:
+#   cassandra1-data:
+#   cassandra2-data:
+#   cassandra3-data:
+
