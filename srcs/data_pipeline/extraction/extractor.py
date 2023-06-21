@@ -29,6 +29,7 @@ class Extractor(ExtractorInterface):
             header (dict): header for request
         """
         self.ticker = ticker
+        print(self.ticker)
         self.header = {
             "User-Agent": 
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
