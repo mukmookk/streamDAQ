@@ -45,6 +45,7 @@ def publish_to_kafka(ticker, kafka_topic, bootstrap_ip, bootstrap_port, mode):
         logging.info("Published to Kafka topic %s", kafka_topic)
     except Exception as e:
         logging.error("Failed to publish to Kafka topic %s: %s", kafka_topic, e)
+        raise
     finally:
         producer.close()
 
@@ -63,11 +64,4 @@ def config_and_get_argparse():
     if not args.broker_port.isdigit():
         parser.error("Please provide a valid port number")
         
-    return args 
-
-def main():
-    args = config_and_get_argparse()
-    publish_to_kafka(args.ticker, args.topic, args.broker_ip, args.broker_port, args.mode)
-
-if __name__ == "__main__":
-    main()
+    return args
