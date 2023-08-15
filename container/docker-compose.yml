@@ -8,8 +8,8 @@ services:
       KAFKA_BROKER_1: kafka1:9092
       KAFKA_BROKER_2: kafka2:9093
       KAFKA_BROKER_3: kafka3:9094
-      KAFKA_BROKER_4: kafka3:9095
-      KAFKA_BROKER_5: kafka3:9096
+      KAFKA_BROKER_4: kafka4:9095
+      KAFKA_BROKER_5: kafka5:9096
       
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
